@@ -56,7 +56,7 @@ with requests.Session() as s:
                         elif re.search("Augment an item with .*",clean_string):
                             string = clean_string.replace("Augment an item with a new ","").replace("modifier","")
                             aug.append(string)
-                        elif re.search("Augment a Magic or Rare with a new .*", clean_string):
+                        elif re.search("Augment a Magic or Rare item with a new .*", clean_string):
                             string = clean_string.replace("Augment a Magic or Rare with a new ", "").replace("modifier", "")
                             aug.append(string)
                         elif re.search("Augment a Rare item with a new modifier, with Lucky modifier values \(\d\d\)",clean_string):
