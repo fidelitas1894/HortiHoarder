@@ -1,11 +1,30 @@
 import requests
 import json
 import re
+import os
 from collections import Counter
 import pyperclip
 
-sessionid= input("sessionid?\n")
-account = input("account?\n")
+# init config object
+config = {'POESESSID': "", 'account': "", 'stashtabIndex': ""}
+
+if not os.path.exists('./config.json'):
+    # config file does not exist, create
+    with open('config.json', 'w') as f:
+        json.dump(config, f)
+
+# config file exists, use
+with open('config.json', 'r') as f:
+    config = json.load(f)
+
+sessionid = input("sessionid? [{}]\n".format(config['POESESSID']))
+if sessionid=="":
+    sessionid = config['POESESSID']
+
+account = input("account? [{}]\n".format(config['account']))
+if account=="":
+    account = config['account']
+
 cookie = {"POESESSID": sessionid}
 remadcrafts = []
 noncrafts =[]
@@ -26,9 +45,18 @@ with requests.Session() as s:
         print ("you got {} stashtabs".format(jsoncontent["numTabs"]))
         for t in jsoncontent["tabs"]:
             print(t["i"],"          ",t["n"])
-        stashid=input("which stash is your horticrafting stash\n")
-        leseURI = "https://www.pathofexile.com/character-window/get-stash-items?accountName={}&league=Harvest&tabIndex={}".format(
-            account, stashid)
+        stashid=input("which stash is your horticrafting stash[{}]\n".format(config['stashtabIndex']))
+        if stashid=="":
+            stashid = config['stashtabIndex']
+        
+        # save config on successful call
+        config['POESESSID'] = sessionid
+        config['account'] = account
+        config['stashtabIndex'] = stashid
+        with open('config.json', 'w') as f:
+            json.dump(config, f)
+
+        leseURI = "https://www.pathofexile.com/character-window/get-stash-items?accountName={}&league=Harvest&tabIndex={}".format(account, stashid)
         print(leseURI)
         rs = s.get(leseURI,cookies=cookie)
         jsonliste = json.loads(rs.content)
