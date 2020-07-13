@@ -5,6 +5,19 @@ import os
 from collections import Counter
 import pyperclip
 
+version = "1.1.2"
+class bcolors:
+    RED = "\033[91m"
+    ENDC = '\033[0m'
+
+
+with requests.Session() as s:
+    versionjson = "https://api.github.com/repos/fidelitas1894/HortiHoarder/releases/latest"
+    r=s.get(versionjson)
+    versionnewest = json.loads(r.content)
+    if not version == versionnewest["name"]:
+        print(bcolors.RED+ "you're running {} while the newest version is {} check https://github.com/fidelitas1894/HortiHoarder/releases/latest".format(version,versionnewest["name"])+bcolors.ENDC)
+
 # init config object
 config = {'POESESSID': "", 'account': "", 'stashtabIndex': ""}
 
@@ -75,6 +88,10 @@ with requests.Session() as s:
                             special.append(string)
                         if re.search('Set a new Implicit modifier on a .*',clean_string):
                             string = clean_string.replace("Set a new Implicit modifier on a ","Implicit")
+                            special.append(string)
+                        if re.search('Synthesise an item, giving random Synthesised implicits .*',clean_string):
+                            string = clean_string.replace("Synthesise an item, giving random Synthesised implicits. Cannot be used on Unique, Influenced, Synthesised or Fractured items", "Synthesis Implicit")
+                            special.append(string)
                         if re.search('Remove a random non-.* modifier from an item and add a new .* \(\d\d\+*\)',clean_string):
                             string = re.sub("Remove a random .* modifier from an item and add a new ","",clean_string).replace("modifier","")
                             noncrafts.append("{}".format(string))
@@ -109,6 +126,18 @@ with requests.Session() as s:
                         elif re.search("Enchant a Weapon\. Quality does not increase its Physical Damage, grants .*",clean_string):
                             string = clean_string.replace("Enchant a ","").replace(" Quality does not increase its Physical Damage, grants","->")
                             special.append(string)
+                        elif re.search(
+                                "Enchant a Weapon\. Quality does not increase its Physical Damage, has .*",
+                                clean_string):
+                            string = clean_string.replace("Enchant a ", "").replace(
+                                " Quality does not increase its Physical Damage, has", "->")
+                            special.append(string)
+                        elif re.search("Enchant a Melee Weapon. Quality does not increase its Physical Damage, .*",clean_string):
+                            string = clean_string.replace("Enchant a","").replace("Quality does not increase its Physical Damage, has","->")
+                            special.append(string)
+                        elif re.search("Upgrade an Oil into an Oil .*",clean_string):
+                            string = clean_string.replace("Upgrade an Oil into an Oil one tier higher","Upgrade Oil")
+                            special.append(string)
                         elif re.search("Change a stack of .*",clean_string):
                             string = clean_string.replace("Change a stack of","").replace("into a different type of","->")
                             change.append(string)
@@ -125,6 +154,10 @@ with requests.Session() as s:
                             special.append(string)
                         elif re.search("Add a random Influence to a Normal, Magic or Rare .* that isn't influenced \(\d\d\+*\)",clean_string):
                             string = clean_string.replace("Add a random Influence to a Normal, Magic or Rare ","influence -> ").replace("that isn't influenced","")
+                            special.append(string)
+                        elif re.search("Add a random Influence to Normal, Magic or Rare .* that isn't influenced \(\d\d\+*\)",clean_string):
+                            string = clean_string.replace("Add a random Influence to Normal, Magic or Rare ",
+                                                          "influence -> ").replace("that isn't influenced", "")
                             special.append(string)
                         elif re.search("Reforge the .* of sockets on an item",clean_string):
                             string= clean_string.replace("Reforge the colours of sockets on an item 10 times, using the outcome with the greatest number of less-common socket colours","10 Chromes")
