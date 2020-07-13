@@ -70,6 +70,11 @@ with requests.Session() as s:
                         for ilvl in ilvls.groups():
                             if int(ilvl.replace("(","").replace(")",""))>=76:
                                 clean_string = clean_string.replace(ilvl,"76+")
+                        if re.search('Sacrifice a Corrupted Gem to gain \d\d% of the gem\'s total .*',clean_string):
+                            string = clean_string.replace("Sacrifice a Corrupted Gem to gain","Sac Gem for").replace("of the gem's total experience stored as a Facetor's Lens ","EXP")
+                            special.append(string)
+                        if re.search('Set a new Implicit modifier on a .*',clean_string):
+                            string = clean_string.replace("Set a new Implicit modifier on a ","Implicit")
                         if re.search('Remove a random non-.* modifier from an item and add a new .* \(\d\d\+*\)',clean_string):
                             string = re.sub("Remove a random .* modifier from an item and add a new ","",clean_string).replace("modifier","")
                             noncrafts.append("{}".format(string))
