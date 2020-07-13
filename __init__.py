@@ -2,6 +2,7 @@ import requests
 import json
 import re
 from collections import Counter
+import os
 
 sessionid= input("sessionid?\n")
 account = input("account?\n")
@@ -15,6 +16,10 @@ change=[]
 randomise=[]
 special =[]
 crafts = []
+
+def addToClipBoard(text):
+    command = 'echo | set /p nul=' + text.strip() + '| clip'
+    os.system(command)
 
 
 with requests.Session() as s:
@@ -115,7 +120,8 @@ with requests.Session() as s:
         stringbuilder = re.sub(" +"," ",stringbuilder)
         print(stringbuilder)
 
-        input("press button to close,")
+        addToClipBoard(stringbuilder)
+        input("output was copied to clipboard\npress button to close,")
     elif r.status_code!=200:
         print("error with account or sessionid")
 
