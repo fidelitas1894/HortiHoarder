@@ -4,6 +4,7 @@ import re
 import os
 from collections import Counter
 import pyperclip
+from termcolor import colored
 
 version = "1.1.2"
 class bcolors:
@@ -16,7 +17,7 @@ with requests.Session() as s:
     r=s.get(versionjson)
     versionnewest = json.loads(r.content)
     if not version == versionnewest["name"]:
-        print(bcolors.RED+ "you're running {} while the newest version is {} check https://github.com/fidelitas1894/HortiHoarder/releases/latest".format(version,versionnewest["name"])+bcolors.ENDC)
+        print(colored("you're running {} while the newest version is {} check https://github.com/fidelitas1894/HortiHoarder/releases/latest".format(version,versionnewest["name"]),"red"))
 
 # init config object
 config = {'POESESSID': "", 'account': "", 'stashtabIndex': ""}
