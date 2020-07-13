@@ -4,20 +4,19 @@ import re
 import os
 from collections import Counter
 import pyperclip
-from termcolor import colored
+from colorama import Fore, init,Style
+
+init()
 
 version = "1.1.2"
-class bcolors:
-    RED = "\033[91m"
-    ENDC = '\033[0m'
-
 
 with requests.Session() as s:
     versionjson = "https://api.github.com/repos/fidelitas1894/HortiHoarder/releases/latest"
     r=s.get(versionjson)
     versionnewest = json.loads(r.content)
     if not version == versionnewest["name"]:
-        print(colored("you're running {} while the newest version is {} check https://github.com/fidelitas1894/HortiHoarder/releases/latest".format(version,versionnewest["name"]),"red"))
+        print(Fore.RED + "you're running {} while the newest version is {} check https://github.com/fidelitas1894/HortiHoarder/releases/latest".format(version,versionnewest["name"])+ Style.RESET_ALL)
+
 
 # init config object
 config = {'POESESSID': "", 'account': "", 'stashtabIndex': ""}

@@ -30,8 +30,8 @@
   ('select', 'D:\\Code\\Python37\\DLLs\\select.pyd', 'EXTENSION'),
   ('_socket', 'D:\\Code\\Python37\\DLLs\\_socket.pyd', 'EXTENSION'),
   ('_ssl', 'D:\\Code\\Python37\\DLLs\\_ssl.pyd', 'EXTENSION'),
-  ('_bz2', 'D:\\Code\\Python37\\DLLs\\_bz2.pyd', 'EXTENSION'),
   ('unicodedata', 'D:\\Code\\Python37\\DLLs\\unicodedata.pyd', 'EXTENSION'),
+  ('_bz2', 'D:\\Code\\Python37\\DLLs\\_bz2.pyd', 'EXTENSION'),
   ('_lzma', 'D:\\Code\\Python37\\DLLs\\_lzma.pyd', 'EXTENSION'),
   ('_hashlib', 'D:\\Code\\Python37\\DLLs\\_hashlib.pyd', 'EXTENSION'),
   ('pyexpat', 'D:\\Code\\Python37\\DLLs\\pyexpat.pyd', 'EXTENSION'),
@@ -56,7 +56,7 @@
  [],
  False,
  False,
- 1594674343,
+ 1594674705,
  [('run.exe',
    'd:\\code\\venv\\untitled4\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-32bit\\run.exe',
    'EXECUTABLE')])
