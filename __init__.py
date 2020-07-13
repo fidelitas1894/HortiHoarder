@@ -2,7 +2,7 @@ import requests
 import json
 import re
 from collections import Counter
-import os
+import pyperclip
 
 sessionid= input("sessionid?\n")
 account = input("account?\n")
@@ -16,11 +16,6 @@ change=[]
 randomise=[]
 special =[]
 crafts = []
-
-def addToClipBoard(text):
-    command = 'echo | set /p nul=' + text.strip() + '| clip'
-    os.system(command)
-
 
 with requests.Session() as s:
     tabnamen = "https://www.pathofexile.com/character-window/get-stash-items?accountName={}&league=Harvest&tabs=1".format(account)
@@ -120,7 +115,7 @@ with requests.Session() as s:
         stringbuilder = re.sub(" +"," ",stringbuilder)
         print(stringbuilder)
 
-        addToClipBoard(stringbuilder)
+        pyperclip.copy(stringbuilder)
         input("output was copied to clipboard\npress button to close,")
     elif r.status_code!=200:
         print("error with account or sessionid")
