@@ -8,7 +8,7 @@ from colorama import Fore, init,Style
 
 init()
 
-version = "1.1.2"
+version = "1.1.3"
 
 with requests.Session() as s:
     versionjson = "https://api.github.com/repos/fidelitas1894/HortiHoarder/releases/latest"
@@ -17,9 +17,9 @@ with requests.Session() as s:
     if not version == versionnewest["name"]:
         print(Fore.RED + "you're running {} while the newest version is {} check https://github.com/fidelitas1894/HortiHoarder/releases/latest".format(version,versionnewest["name"])+ Style.RESET_ALL)
 
-
+print("Pressing enter will use the values in [], if you get an error after updating please try deleting your config.json")
 # init config object
-config = {'POESESSID': "", 'account': "", 'stashtabIndex': ""}
+config = {'POESESSID': "", 'account': "", 'stashtabIndex': "",'league':""}
 
 if not os.path.exists('./config.json'):
     # config file does not exist, create
@@ -29,6 +29,10 @@ if not os.path.exists('./config.json'):
 # config file exists, use
 with open('config.json', 'r') as f:
     config = json.load(f)
+    if not "league" in config:
+        config["league"] = ""
+with open("config.json","w") as f:
+    json.dump(config,f)
 
 sessionid = input("sessionid? [{}]\n".format(config['POESESSID']))
 if sessionid=="":
@@ -51,7 +55,26 @@ crafts = []
 reforge = []
 
 with requests.Session() as s:
-    tabnamen = "https://www.pathofexile.com/character-window/get-stash-items?accountName={}&league=Harvest&tabs=1".format(account)
+    league = input("league? (hsc,ssfhsc,hhc,ssfhch,standard,ssfstandard) [{}]".format(config['league']))
+    if league == "hsc":
+        league="harvest"
+    elif league=="ssfhsc":
+        league="ssf harvest"
+    elif league=="hhc":
+        league="hardcore harvest"
+    elif league=="ssf hhc":
+        league="ssf harvest hc"
+    elif league=="standard":
+        league="standard"
+    elif league=="ssfstandard":
+        league=="ssf standard"
+    elif league=="ssfhardcore":
+        league="ssf hardcore"
+    elif league=="hardcore":
+        league= "hardcore"
+    if league=="":
+        league=config['league']
+    tabnamen = "https://www.pathofexile.com/character-window/get-stash-items?accountName={}&league={}&tabs=1".format(account,league)
     r=s.get(tabnamen,cookies=cookie)
     if r.status_code==200:
         jsoncontent = json.loads(r.content)
@@ -66,6 +89,7 @@ with requests.Session() as s:
         config['POESESSID'] = sessionid
         config['account'] = account
         config['stashtabIndex'] = stashid
+        config['league'] =league
         with open('config.json', 'w') as f:
             json.dump(config, f)
 
