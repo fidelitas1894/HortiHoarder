@@ -1,5 +1,13 @@
-Copy paste the code into name.py<br>
-run it<br>
+
+# Pre-requisite:
+- Python3
+- pip
+
+# How To Run - TLDR
+```
+sh start.sh
+```
+
 enter your session id -> https://github.com/Stickymaddness/Procurement/wiki/SessionID <br>
 enter your account name<br>
 
