@@ -8,7 +8,7 @@ from colorama import Fore, init,Style
 
 init()
 
-version = "1.1.3"
+version = "1.1.4"
 
 with requests.Session() as s:
     versionjson = "https://api.github.com/repos/fidelitas1894/HortiHoarder/releases/latest"
