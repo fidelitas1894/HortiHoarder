@@ -54,24 +54,22 @@ special =[]
 crafts = []
 reforge = []
 
+def leagues():
+    leaguenames = ""
+    with requests.Session() as l:
+        leaguehtml = l.get("https://www.pathofexile.com/character-window/get-characters?accountName={}".format(account),cookies =cookie)
+        leaguejson = json.loads(leaguehtml.content)
+
+        for league in leaguejson:
+            if not league["league"] in leaguenames:
+                leaguenames+="{}\n".format(league["league"])
+    return leaguenames
+
 with requests.Session() as s:
-    league = input("league? (hsc,ssfhsc,hhc,ssfhch,standard,ssfstandard) [{}]".format(config['league']))
-    if league == "hsc":
-        league="harvest"
-    elif league=="ssfhsc":
-        league="ssf harvest"
-    elif league=="hhc":
-        league="hardcore harvest"
-    elif league=="ssf hhc":
-        league="ssf harvest hc"
-    elif league=="standard":
-        league="standard"
-    elif league=="ssfstandard":
-        league=="ssf standard"
-    elif league=="ssfhardcore":
-        league="ssf hardcore"
-    elif league=="hardcore":
-        league= "hardcore"
+    league = input("league (enter help to see all available)?[{}]\n".format(config['league']))
+    if league=="help":
+        print(leagues())
+        league = input("please insert league now:\n")
     if league=="":
         league=config['league']
     tabnamen = "https://www.pathofexile.com/character-window/get-stash-items?accountName={}&league={}&tabs=1".format(account,league)
@@ -258,4 +256,3 @@ with requests.Session() as s:
         input("output was copied to clipboard\npress button to close,")
     elif r.status_code!=200:
         print("error with account or sessionid")
-
