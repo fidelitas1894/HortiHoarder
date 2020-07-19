@@ -79,10 +79,10 @@ with requests.Session() as s:
         print ("you got {} stashtabs".format(jsoncontent["numTabs"]))
         for t in jsoncontent["tabs"]:
             print(t["i"],"          ",t["n"])
-        stashid=input("which stash is your horticrafting stash[{}]\n".format(config['stashtabIndex']))
+        stashid=input("which stash is your horticrafting stash (seperate by \",\")[{}]\n".format(config['stashtabIndex']))
         if stashid=="":
             stashid = config['stashtabIndex']
-        
+
         # save config on successful call
         config['POESESSID'] = sessionid
         config['account'] = account
@@ -90,116 +90,117 @@ with requests.Session() as s:
         config['league'] =league
         with open('config.json', 'w') as f:
             json.dump(config, f)
+        ids=stashid.split(",")
+        for id in ids:
+            leseURI = "https://www.pathofexile.com/character-window/get-stash-items?accountName={}&league=Harvest&tabIndex={}".format(account, id)
+            print(leseURI)
+            rs = s.get(leseURI,cookies=cookie)
+            jsonliste = json.loads(rs.content)
+            items = jsonliste["items"]
+            for item in items:
+                if item["typeLine"] == "Horticrafting Station":
+                    if "craftedMods" in item:
+                        for craft in item["craftedMods"]:
+                            clean_string = craft.replace("<white>{","").replace("}","")
+                            ilvls=re.search(r"(\d\d)",clean_string)
+                            for ilvl in ilvls.groups():
+                                if int(ilvl.replace("(","").replace(")",""))>=76:
+                                    clean_string = clean_string.replace(ilvl,"76+")
+                            if re.search('Sacrifice a Corrupted Gem to gain \d\d% of the gem\'s total .*',clean_string):
+                                string = clean_string.replace("Sacrifice a Corrupted Gem to gain","Sac Gem for").replace("of the gem's total experience stored as a Facetor's Lens ","EXP")
+                                special.append(string)
+                            if re.search('Set a new Implicit modifier on a .*',clean_string):
+                                string = clean_string.replace("Set a new Implicit modifier on a ","Implicit")
+                                special.append(string)
+                            if re.search('Synthesise an item, giving random Synthesised implicits .*',clean_string):
+                                string = clean_string.replace("Synthesise an item, giving random Synthesised implicits. Cannot be used on Unique, Influenced, Synthesised or Fractured items", "Synthesis Implicit")
+                                special.append(string)
+                            if re.search('Remove a random non-.* modifier from an item and add a new .* \(\d\d\+*\)',clean_string):
+                                string = re.sub("Remove a random .* modifier from an item and add a new ","",clean_string).replace("modifier","")
+                                noncrafts.append("{}".format(string))
+                            elif re.search('Remove a random .* modifier from an item and add a new .* \(\d\d\+*\)',clean_string):
+                                string = re.sub("Remove a random .* modifier from an item and add a new ","",clean_string).replace("modifier","")
+                                remadcrafts.append("{}".format(string))
+                            elif re.search("Remove a random .* modifier from an item \(\d\d\\+*\)",clean_string):
+                                string = clean_string.replace("Remove a random ","").replace(" modifier from an item","")
+                                removecrafts.append(string)
+                            elif re.search("Augment an item with a new .* with Lucky values \(\d\d\+*\)",clean_string):
+                                string = clean_string.replace("Augment an item with a new ","").replace("with Lucky values ","").replace("modifier","")
+                                luckyaug.append(string)
+                            elif re.search("Augment a Magic or Rare item with a new .* with Lucky values \(\d\d\+*\)", clean_string):
+                                string = clean_string.replace("Augment a Magic or Rare item with a new ", "").replace(
+                                    "with Lucky values ", "").replace("modifier","")
+                                luckyaug.append(string)
+                            elif re.search("Augment an item with .*",clean_string):
+                                string = clean_string.replace("Augment an item with a new ","").replace("modifier","")
+                                aug.append(string)
+                            elif re.search("Augment a Magic or Rare item with a new .*", clean_string):
+                                string = clean_string.replace("Augment a Magic or Rare item with a new ", "").replace("modifier", "")
+                                aug.append(string)
+                            elif re.search("Augment a Rare item with a new modifier, with Lucky modifier values \(\d\d\+*\)",clean_string):
+                                string = clean_string.replace("Augment a Rare item with a new modifier, with","").replace("modifier values","")
+                                aug.append(string)
+                            elif re.search("Change a modifier that grants .* into",clean_string):
+                                string = clean_string.replace("Change a modifier that grants ","").replace("Resistance","").replace("into a similar-tier modifier that grants"," --> ")
+                                change.append(string)
+                            elif re.search("Randomise the numeric values of the random .* modifiers on a Magic or Rare item \(\d\d\+*\)",clean_string):
+                                string = clean_string.replace("Randomise the numeric values of the random ","").replace("modifiers on a Magic or Rare item","")
+                                randomise.append(string)
+                            elif re.search("Enchant a Weapon\. Quality does not increase its Physical Damage, grants .*",clean_string):
+                                string = clean_string.replace("Enchant a ","").replace(" Quality does not increase its Physical Damage, grants","->")
+                                special.append(string)
+                            elif re.search(
+                                    "Enchant a Weapon\. Quality does not increase its Physical Damage, has .*",
+                                    clean_string):
+                                string = clean_string.replace("Enchant a ", "").replace(
+                                    " Quality does not increase its Physical Damage, has", "->")
+                                special.append(string)
+                            elif re.search("Enchant a Melee Weapon. Quality does not increase its Physical Damage, .*",clean_string):
+                                string = clean_string.replace("Enchant a","").replace("Quality does not increase its Physical Damage, has","->")
+                                special.append(string)
+                            elif re.search("Upgrade an Oil into an Oil .*",clean_string):
+                                string = clean_string.replace("Upgrade an Oil into an Oil one tier higher","Upgrade Oil")
+                                special.append(string)
+                            elif re.search("Change a stack of .*",clean_string):
+                                string = clean_string.replace("Change a stack of","").replace("into a different type of","->")
+                                change.append(string)
+                            elif re.search("Change a Unique Bestiary item .*",clean_string):
+                                string = clean_string.replace("Change a Unique Bestiary item or item with an Aspect into Lures of the same beast family","Bestiary Unique/Aspect -> Lure")
+                                change.append(string)
+                            elif re.search("Change a Harbinger Unique .*",clean_string):
+                                string= "Harbinger Unique/Piece -> Beachhead"
+                            elif re.search("Sacrifice a Map to create a random Scarab based on its colour .*",clean_string):
+                                string = clean_string.replace("Sacrifice a Map to create a random Scarab based on its colour","Map -> Scarab")
+                                special.append(string)
+                            elif re.search("Enchant Body Armour\..*",clean_string):
+                                string = clean_string.replace("Enchant","").replace("Quality does not increase its Defences, grants","->")
+                                special.append(string)
+                            elif re.search("Add a random Influence to a Normal, Magic or Rare .* that isn't influenced \(\d\d\+*\)",clean_string):
+                                string = clean_string.replace("Add a random Influence to a Normal, Magic or Rare ","influence -> ").replace("that isn't influenced","")
+                                special.append(string)
+                            elif re.search("Add a random Influence to Normal, Magic or Rare .* that isn't influenced \(\d\d\+*\)",clean_string):
+                                string = clean_string.replace("Add a random Influence to Normal, Magic or Rare ",
+                                                              "influence -> ").replace("that isn't influenced", "")
+                                special.append(string)
+                            elif re.search("Reforge the .* of sockets on an item",clean_string):
+                                string= clean_string.replace("Reforge the colours of sockets on an item 10 times, using the outcome with the greatest number of less-common socket colours","10 Chromes")
+                                reforge.append(string)
+                            elif re.search("Reforge a Rare item with new random modifiers, including a .*\. .* modifiers are more common",clean_string):
+                                string = re.sub("Reforge a Rare item with new random modifiers, including a .*\.","",clean_string).replace("modifiers are ","")
+                                reforge.append(string)
+                            elif re.search("Reforge a Rare item with new random modifiers, including a .* \(\d\d\+*\)",clean_string):
+                                string = clean_string.replace("Reforge a Rare item with new random modifiers, including a","").replace("modifier","")
+                                reforge.append(string)
+                            elif re.search("Reforge the links between sockets on an item 10 times, using the outcome with the greatest number of linked sockets .*",clean_string):
+                                string = "10 fuse"
+                                reforge.append(string)
+                            else:
+                                special.append(clean_string
+                                                .replace("Reforge the links between sockets on an item,","")
+                                                .replace("Set an item to","")
+                                                .replace("Change a Gem into another Gem, carrying over experience and quality if possible","gem change")
 
-        leseURI = "https://www.pathofexile.com/character-window/get-stash-items?accountName={}&league=Harvest&tabIndex={}".format(account, stashid)
-        print(leseURI)
-        rs = s.get(leseURI,cookies=cookie)
-        jsonliste = json.loads(rs.content)
-        items = jsonliste["items"]
-        for item in items:
-            if item["typeLine"] == "Horticrafting Station":
-                if "craftedMods" in item:
-                    for craft in item["craftedMods"]:
-                        clean_string = craft.replace("<white>{","").replace("}","")
-                        ilvls=re.search(r"(\d\d)",clean_string)
-                        for ilvl in ilvls.groups():
-                            if int(ilvl.replace("(","").replace(")",""))>=76:
-                                clean_string = clean_string.replace(ilvl,"76+")
-                        if re.search('Sacrifice a Corrupted Gem to gain \d\d% of the gem\'s total .*',clean_string):
-                            string = clean_string.replace("Sacrifice a Corrupted Gem to gain","Sac Gem for").replace("of the gem's total experience stored as a Facetor's Lens ","EXP")
-                            special.append(string)
-                        if re.search('Set a new Implicit modifier on a .*',clean_string):
-                            string = clean_string.replace("Set a new Implicit modifier on a ","Implicit")
-                            special.append(string)
-                        if re.search('Synthesise an item, giving random Synthesised implicits .*',clean_string):
-                            string = clean_string.replace("Synthesise an item, giving random Synthesised implicits. Cannot be used on Unique, Influenced, Synthesised or Fractured items", "Synthesis Implicit")
-                            special.append(string)
-                        if re.search('Remove a random non-.* modifier from an item and add a new .* \(\d\d\+*\)',clean_string):
-                            string = re.sub("Remove a random .* modifier from an item and add a new ","",clean_string).replace("modifier","")
-                            noncrafts.append("{}".format(string))
-                        elif re.search('Remove a random .* modifier from an item and add a new .* \(\d\d\+*\)',clean_string):
-                            string = re.sub("Remove a random .* modifier from an item and add a new ","",clean_string).replace("modifier","")
-                            remadcrafts.append("{}".format(string))
-                        elif re.search("Remove a random .* modifier from an item \(\d\d\\+*\)",clean_string):
-                            string = clean_string.replace("Remove a random ","").replace(" modifier from an item","")
-                            removecrafts.append(string)
-                        elif re.search("Augment an item with a new .* with Lucky values \(\d\d\+*\)",clean_string):
-                            string = clean_string.replace("Augment an item with a new ","").replace("with Lucky values ","").replace("modifier","")
-                            luckyaug.append(string)
-                        elif re.search("Augment a Magic or Rare item with a new .* with Lucky values \(\d\d\+*\)", clean_string):
-                            string = clean_string.replace("Augment a Magic or Rare item with a new ", "").replace(
-                                "with Lucky values ", "").replace("modifier","")
-                            luckyaug.append(string)
-                        elif re.search("Augment an item with .*",clean_string):
-                            string = clean_string.replace("Augment an item with a new ","").replace("modifier","")
-                            aug.append(string)
-                        elif re.search("Augment a Magic or Rare item with a new .*", clean_string):
-                            string = clean_string.replace("Augment a Magic or Rare item with a new ", "").replace("modifier", "")
-                            aug.append(string)
-                        elif re.search("Augment a Rare item with a new modifier, with Lucky modifier values \(\d\d\+*\)",clean_string):
-                            string = clean_string.replace("Augment a Rare item with a new modifier, with","").replace("modifier values","")
-                            aug.append(string)
-                        elif re.search("Change a modifier that grants .* into",clean_string):
-                            string = clean_string.replace("Change a modifier that grants ","").replace("Resistance","").replace("into a similar-tier modifier that grants"," --> ")
-                            change.append(string)
-                        elif re.search("Randomise the numeric values of the random .* modifiers on a Magic or Rare item \(\d\d\+*\)",clean_string):
-                            string = clean_string.replace("Randomise the numeric values of the random ","").replace("modifiers on a Magic or Rare item","")
-                            randomise.append(string)
-                        elif re.search("Enchant a Weapon\. Quality does not increase its Physical Damage, grants .*",clean_string):
-                            string = clean_string.replace("Enchant a ","").replace(" Quality does not increase its Physical Damage, grants","->")
-                            special.append(string)
-                        elif re.search(
-                                "Enchant a Weapon\. Quality does not increase its Physical Damage, has .*",
-                                clean_string):
-                            string = clean_string.replace("Enchant a ", "").replace(
-                                " Quality does not increase its Physical Damage, has", "->")
-                            special.append(string)
-                        elif re.search("Enchant a Melee Weapon. Quality does not increase its Physical Damage, .*",clean_string):
-                            string = clean_string.replace("Enchant a","").replace("Quality does not increase its Physical Damage, has","->")
-                            special.append(string)
-                        elif re.search("Upgrade an Oil into an Oil .*",clean_string):
-                            string = clean_string.replace("Upgrade an Oil into an Oil one tier higher","Upgrade Oil")
-                            special.append(string)
-                        elif re.search("Change a stack of .*",clean_string):
-                            string = clean_string.replace("Change a stack of","").replace("into a different type of","->")
-                            change.append(string)
-                        elif re.search("Change a Unique Bestiary item .*",clean_string):
-                            string = clean_string.replace("Change a Unique Bestiary item or item with an Aspect into Lures of the same beast family","Bestiary Unique/Aspect -> Lure")
-                            change.append(string)
-                        elif re.search("Change a Harbinger Unique .*",clean_string):
-                            string= "Harbinger Unique/Piece -> Beachhead"
-                        elif re.search("Sacrifice a Map to create a random Scarab based on its colour .*",clean_string):
-                            string = clean_string.replace("Sacrifice a Map to create a random Scarab based on its colour","Map -> Scarab")
-                            special.append(string)
-                        elif re.search("Enchant Body Armour\..*",clean_string):
-                            string = clean_string.replace("Enchant","").replace("Quality does not increase its Defences, grants","->")
-                            special.append(string)
-                        elif re.search("Add a random Influence to a Normal, Magic or Rare .* that isn't influenced \(\d\d\+*\)",clean_string):
-                            string = clean_string.replace("Add a random Influence to a Normal, Magic or Rare ","influence -> ").replace("that isn't influenced","")
-                            special.append(string)
-                        elif re.search("Add a random Influence to Normal, Magic or Rare .* that isn't influenced \(\d\d\+*\)",clean_string):
-                            string = clean_string.replace("Add a random Influence to Normal, Magic or Rare ",
-                                                          "influence -> ").replace("that isn't influenced", "")
-                            special.append(string)
-                        elif re.search("Reforge the .* of sockets on an item",clean_string):
-                            string= clean_string.replace("Reforge the colours of sockets on an item 10 times, using the outcome with the greatest number of less-common socket colours","10 Chromes")
-                            reforge.append(string)
-                        elif re.search("Reforge a Rare item with new random modifiers, including a .*\. .* modifiers are more common",clean_string):
-                            string = re.sub("Reforge a Rare item with new random modifiers, including a .*\.","",clean_string).replace("modifiers are ","")
-                            reforge.append(string)
-                        elif re.search("Reforge a Rare item with new random modifiers, including a .* \(\d\d\+*\)",clean_string):
-                            string = clean_string.replace("Reforge a Rare item with new random modifiers, including a","").replace("modifier","")
-                            reforge.append(string)
-                        elif re.search("Reforge the links between sockets on an item 10 times, using the outcome with the greatest number of linked sockets .*",clean_string):
-                            string = "10 fuse"
-                            reforge.append(string)
-                        else:
-                            special.append(clean_string
-                                            .replace("Reforge the links between sockets on an item,","")
-                                            .replace("Set an item to","")
-                                            .replace("Change a Gem into another Gem, carrying over experience and quality if possible","gem change")
-
-                                           )
+                                               )
 
         stringbuilder="```css\nWTS HSC\n"
 
