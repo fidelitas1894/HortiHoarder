@@ -92,7 +92,7 @@ with requests.Session() as s:
             json.dump(config, f)
         ids=stashid.split(",")
         for id in ids:
-            leseURI = "https://www.pathofexile.com/character-window/get-stash-items?accountName={}&league=Harvest&tabIndex={}".format(account, id)
+            leseURI = "https://www.pathofexile.com/character-window/get-stash-items?accountName={}&league={}&tabIndex={}".format(account,league, id)
             print(leseURI)
             rs = s.get(leseURI,cookies=cookie)
             jsonliste = json.loads(rs.content)

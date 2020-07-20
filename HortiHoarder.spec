@@ -3,8 +3,8 @@
 block_cipher = None
 
 
-a = Analysis(['hortihoarder.py'],
-             pathex=['D:\\Code\\untitled4'],
+a = Analysis(['Hortihoarder.py'],
+             pathex=['C:\\Users\\Christian\\IdeaProjects\\HortiHoarder'],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -23,7 +23,7 @@ exe = EXE(pyz,
           a.zipfiles,
           a.datas,
           [],
-          name='hortihoarder',
+          name='Hortihoarder',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
